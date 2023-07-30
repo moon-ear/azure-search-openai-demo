@@ -48,6 +48,10 @@ AZURE_SPEECH_SERVICE_KEY = os.environ.get(
 AZURE_SPEECH_SERVICE_REGION = os.environ.get(
     "AZURE_SPEECH_SERVICE_REGION") or "YourSpeechServiceRegion"
 
+AZURE_OPENAI_CHATGPT_MODEL = os.environ.get(
+    "AZURE_OPENAI_CHATGPT_MODEL") or "gpt-35-turbo"
+AZURE_OPENAI_EMB_DEPLOYMENT = os.environ.get(
+    "AZURE_OPENAI_EMB_DEPLOYMENT") or "embedding"
 
 KB_FIELDS_CONTENT = os.environ.get("KB_FIELDS_CONTENT") or "content"
 KB_FIELDS_CATEGORY = os.environ.get("KB_FIELDS_CATEGORY") or "category"
@@ -57,12 +61,13 @@ KB_FIELDS_SOURCEPAGE = os.environ.get("KB_FIELDS_SOURCEPAGE") or "sourcepage"
 # just use 'az login' locally, and managed identity when deployed on Azure). If you need to use keys, use separate AzureKeyCredential instances with the
 # keys for each service
 # If you encounter a blocking error during a DefaultAzureCredntial resolution, you can exclude the problematic credential by using a parameter (ex. exclude_shared_token_cache_credential=True)
-azure_credential = DefaultAzureCredential()
+azure_credential = DefaultAzureCredential(
+    exclude_shared_token_cache_credential=True)
 
 # Used by the OpenAI SDK
 openai.api_type = "azure"
 openai.api_base = f"https://{AZURE_OPENAI_SERVICE}.openai.azure.com"
-openai.api_version = "2022-12-01"
+openai.api_version = "2023-05-15"
 
 # Comment these two lines out if using keys, set your API key in the OPENAI_API_KEY environment variable instead
 openai.api_type = "azure_ad"
@@ -83,13 +88,18 @@ blob_container = blob_client.get_container_client(AZURE_STORAGE_CONTAINER)
 # Various approaches to integrate GPT and external knowledge, most applications will use a single one of these patterns
 # or some derivative, here we include several for exploration purposes
 ask_approaches = {
-    "rtr": RetrieveThenReadApproach(search_client, AZURE_OPENAI_GPT_DEPLOYMENT, KB_FIELDS_SOURCEPAGE, KB_FIELDS_CONTENT),
-    "rrr": ReadRetrieveReadApproach(search_client, AZURE_OPENAI_GPT_DEPLOYMENT, KB_FIELDS_SOURCEPAGE, KB_FIELDS_CONTENT),
-    "rda": ReadDecomposeAsk(search_client, AZURE_OPENAI_GPT_DEPLOYMENT, KB_FIELDS_SOURCEPAGE, KB_FIELDS_CONTENT)
+    "rtr": RetrieveThenReadApproach(search_client, AZURE_OPENAI_CHATGPT_DEPLOYMENT, AZURE_OPENAI_CHATGPT_MODEL, AZURE_OPENAI_EMB_DEPLOYMENT, KB_FIELDS_SOURCEPAGE, KB_FIELDS_CONTENT),
+    "rrr": ReadRetrieveReadApproach(search_client, AZURE_OPENAI_GPT_DEPLOYMENT, AZURE_OPENAI_EMB_DEPLOYMENT, KB_FIELDS_SOURCEPAGE, KB_FIELDS_CONTENT),
+    "rda": ReadDecomposeAsk(search_client, AZURE_OPENAI_GPT_DEPLOYMENT, AZURE_OPENAI_EMB_DEPLOYMENT, KB_FIELDS_SOURCEPAGE, KB_FIELDS_CONTENT)
 }
 
 chat_approaches = {
-    "rrr": ChatReadRetrieveReadApproach(search_client, AZURE_OPENAI_CHATGPT_DEPLOYMENT, AZURE_OPENAI_GPT_DEPLOYMENT, KB_FIELDS_SOURCEPAGE, KB_FIELDS_CONTENT)
+    "rrr": ChatReadRetrieveReadApproach(search_client,
+                                        AZURE_OPENAI_CHATGPT_DEPLOYMENT,
+                                        AZURE_OPENAI_CHATGPT_MODEL,
+                                        AZURE_OPENAI_EMB_DEPLOYMENT,
+                                        KB_FIELDS_SOURCEPAGE,
+                                        KB_FIELDS_CONTENT)
 }
 
 app = Flask(__name__)
