@@ -1,3 +1,4 @@
+from reportlab.lib.pagesizes import letter
 from cgi import FieldStorage
 from io import BytesIO
 import io
@@ -568,7 +569,7 @@ def transcribe_audio(file_name):
     def recognized_cb(evt):
         """callback that appends recognized text to recognized_text list"""
         print('RECOGNIZED: {}'.format(evt))
-        recognized_text.append(evt.result.text)
+        recognized_text.append(evt.result.text + '\n')
 
     speech_recognizer.recognized.connect(recognized_cb)
     speech_recognizer.session_stopped.connect(stop_cb)
@@ -598,17 +599,26 @@ def generate_pdf(transcript, output_path):
     print("given transcript")
     print(transcript)
     print(output_path)
-    c = canvas.Canvas(output_path)
+    c = canvas.Canvas(output_path, pagesize=letter)
+    width, height = letter
     c.setFont("Helvetica", 10)
-    textobject = c.beginText(40, 40)
+
+    # Start at the top of the page (minus some margin)
+    y_position = height - 40
     try:
         for line in transcript.split('\n'):
+            if y_position <= 40:  # If close to the bottom of the page, create a new page
+                c.showPage()
+                y_position = height - 40  # Reset the y position for the new page
+            textobject = c.beginText(40, y_position)
             textobject.textLine(line)
-        c.drawText(textobject)
+            c.drawText(textobject)
+            y_position -= 14  # Move down by the line height
         c.showPage()
     finally:
         c.save()
     return output_path
+
 
 ############
 
