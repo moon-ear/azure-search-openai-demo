@@ -18,7 +18,7 @@ param searchServiceResourceGroupName string = ''
 param searchServiceResourceGroupLocation string = location
 
 param searchServiceSkuName string = 'standard'
-param searchIndexName string // Set in main.parameters.json
+param searchIndexName string = 'gptkbindex'
 
 param storageAccountName string = ''
 param storageResourceGroupName string = ''
@@ -27,14 +27,7 @@ param storageContainerName string = 'content'
 
 param openAiServiceName string = ''
 param openAiResourceGroupName string = ''
-@description('Location for the OpenAI resource group')
-@allowed(['eastus', 'southcentralus', 'westeurope'])
-@metadata({
-  azd: {
-    type: 'location'
-  }
-})
-param openAiResourceGroupLocation string
+param openAiResourceGroupLocation string = location
 
 param openAiSkuName string = 'S0'
 
@@ -47,12 +40,9 @@ param formRecognizerSkuName string = 'S0'
 param gptDeploymentName string = ''
 param gptDeploymentCapacity int = 30
 param gptModelName string = 'gpt-35-turbo'
-param chatGptDeploymentName string // Set in main.parameters.json
+param chatGptDeploymentName string = ''
 param chatGptDeploymentCapacity int = 30
 param chatGptModelName string = 'gpt-35-turbo'
-param embeddingDeploymentName string = 'embedding'
-param embeddingDeploymentCapacity int = 30
-param embeddingModelName string = 'text-embedding-ada-002'
 
 @description('Id of the user or app to assign application roles')
 param principalId string = ''
@@ -113,7 +103,6 @@ module backend 'core/host/appservice.bicep' = {
     appServicePlanId: appServicePlan.outputs.id
     runtimeName: 'python'
     runtimeVersion: '3.10'
-    appCommandLine: 'start_appservice.sh'
     scmDoBuildDuringDeployment: true
     managedIdentity: true
     appSettings: {
@@ -122,9 +111,8 @@ module backend 'core/host/appservice.bicep' = {
       AZURE_OPENAI_SERVICE: openAi.outputs.name
       AZURE_SEARCH_INDEX: searchIndexName
       AZURE_SEARCH_SERVICE: searchService.outputs.name
-      AZURE_OPENAI_GPT_DEPLOYMENT: gptDeploymentName
-      AZURE_OPENAI_CHATGPT_DEPLOYMENT: chatGptDeploymentName
-      AZURE_OPENAI_EMB_DEPLOYMENT: embeddingDeploymentName
+      AZURE_OPENAI_GPT_DEPLOYMENT: gptDeployment
+      AZURE_OPENAI_CHATGPT_DEPLOYMENT: chatGptDeployment
     }
   }
 }
@@ -147,10 +135,6 @@ module openAi 'core/ai/cognitiveservices.bicep' = {
           name: gptModelName
           version: '0301'
         }
-        sku: {
-          name: 'Standard'
-          capacity: gptDeploymentCapacity
-        }
         capacity: gptDeploymentCapacity
       }
       {
@@ -161,15 +145,6 @@ module openAi 'core/ai/cognitiveservices.bicep' = {
           version: '0301'
         }
         capacity: chatGptDeploymentCapacity
-      }
-      {
-        name: embeddingDeploymentName
-        model: {
-          format: 'OpenAI'
-          name: embeddingModelName
-          version: '2'
-        }
-        capacity: embeddingDeploymentCapacity
       }
     ]
   }
@@ -340,9 +315,8 @@ output AZURE_RESOURCE_GROUP string = resourceGroup.name
 
 output AZURE_OPENAI_SERVICE string = openAi.outputs.name
 output AZURE_OPENAI_RESOURCE_GROUP string = openAiResourceGroup.name
-output AZURE_OPENAI_GPT_DEPLOYMENT string = gptDeploymentName
-output AZURE_OPENAI_CHATGPT_DEPLOYMENT string = chatGptDeploymentName
-output AZURE_OPENAI_EMB_DEPLOYMENT string = embeddingDeploymentName
+output AZURE_OPENAI_GPT_DEPLOYMENT string = gptDeployment
+output AZURE_OPENAI_CHATGPT_DEPLOYMENT string = chatGptDeployment
 
 output AZURE_FORMRECOGNIZER_SERVICE string = formRecognizer.outputs.name
 output AZURE_FORMRECOGNIZER_RESOURCE_GROUP string = formRecognizerResourceGroup.name
