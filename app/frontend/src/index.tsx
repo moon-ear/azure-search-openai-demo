@@ -1,11 +1,13 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
-import { createHashRouter, RouterProvider } from "react-router-dom";
+import { HashRouter, Routes, Route } from "react-router-dom";
 import { initializeIcons } from "@fluentui/react";
 
 import "./index.css";
 
 import Layout from "./pages/layout/Layout";
+import NoPage from "./pages/NoPage";
+import OneShot from "./pages/oneshot/OneShot";
 import Chat from "./pages/chat/Chat";
 import KnowledgeBase from "./pages/knowledgeBase/KnowledgeBase";
 import Upload from "./pages/upload/Upload";
@@ -26,29 +28,9 @@ export default function App() {
         </HashRouter>
     );
 }
-// const router = createHashRouter([
-//     {
-//         path: "/",
-//         element: <Layout />,
-//         children: [
-//             {
-//                 index: true,
-//                 element: <Chat />
-//             },
-//             {
-//                 path: "qa",
-//                 lazy: () => import("./pages/oneshot/OneShot")
-//             },
-//             {
-//                 path: "*",
-//                 lazy: () => import("./pages/NoPage")
-//             }
-//         ]
-//     }
-// ]);
 
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
     <React.StrictMode>
-        <RouterProvider router={router} />
+        <App />
     </React.StrictMode>
 );
