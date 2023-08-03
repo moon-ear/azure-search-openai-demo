@@ -149,6 +149,18 @@ export async function uploadDocument(file: File) {
     return await response.text();
 }
 
+export async function getStatus(fileName: string): Promise<string> {
+    const response = await fetch(`/file_status/${encodeURIComponent(fileName)}`);
+
+    if (response.status > 299 || !response.ok) {
+        const errorResponse = await response.json();
+        throw Error(errorResponse.error || "Unknown error");
+    }
+
+    const data = await response.json();
+    return data.status;
+}
+
 export function getCitationFilePath(citation: string): string {
     return `/content/${citation}`;
 }

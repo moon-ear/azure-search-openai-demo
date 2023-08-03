@@ -342,8 +342,6 @@ def get_document_text(file):
 
     # Write the contents of the uploaded file to this temporary file
     file_content = file.read()
-    print("file_content")
-    print(file_content)
     temp.write(file_content)
     temp.close()
 
@@ -352,18 +350,12 @@ def get_document_text(file):
         raise ValueError("The uploaded file is empty.")
 
     print("got in document text")
-    print("temp.name")
-    print(temp.name)
     reader = PdfReader(temp.name)
     pages = reader.pages
     for page_num, p in enumerate(pages):
-        print("reading pages")
         page_text = p.extract_text()
-        print("extracting text")
         page_map.append((page_num, offset, page_text))
-        print("appending")
         offset += len(page_text)
-        print("offset")
     print(
         f"Extracting text from '{file.filename}' using Azure Form Recognizer")
     form_recognizer_client = DocumentAnalysisClient(
@@ -485,6 +477,10 @@ def index_sections(file, sections):
         print(f"\tIndexed {len(results)} sections, {succeeded} succeeded")
 
 
+# This is an in-memory example; in a real application, you might use a database
+file_statuses = {}
+
+
 @app.route("/upload_document", methods=["POST"])
 def upload_document():
     if 'file' not in request.files:
@@ -505,9 +501,11 @@ def upload_document():
         file.save(audio_path)
 
         # Transcribe the audio to text
+        file_statuses[file.filename] = 'Transcribing Audio File'
         transcript = transcribe_audio(audio_path)
         os.remove(audio_path)
 
+        file_statuses[file.filename] = 'Generating PDF'
         # Save transcript to PDF
         pdf_tmp_filepath = os.path.join(
             tempfile.gettempdir(), f'{os.path.splitext(file.filename)[0]}.pdf')
@@ -523,20 +521,30 @@ def upload_document():
         os.remove(pdf_tmp_filepath)
         print(f"Generated PDF")
         # Upload the generated PDF
+        file_statuses[file.filename] = 'Uploading'
         upload_blobs(pdf_file)
         page_map = get_document_text(pdf_file)
         sections = create_sections(pdf_file, page_map)
         index_sections(pdf_file, sections)
+        file_statuses[file.filename] = 'Uploaded'
     else:
         print(f"Uploading file")
+        file_statuses[file.filename] = 'Uploading'
         upload_blobs(file)
         page_map = get_document_text(file)
+        file_statuses[file.filename] = 'Processing'
         sections = create_sections(file, page_map)
         index_sections(file, sections)
+        file_statuses[file.filename] = 'Uploaded'
         # for get_document_text, create_sections, and index_sections, you might need to adjust those functions
         # or save the file temporarily if they also need to read the file content
 
     return 'File successfully uploaded', 200
+
+
+@app.route('/file_status/<file_name>', methods=['GET'])
+def file_status(file_name):
+    return jsonify(status=file_statuses.get(file_name, 'unknown'))
 
 
 def transcribe_audio(file_name):
@@ -585,14 +593,6 @@ def transcribe_audio(file_name):
     full_text = ' '.join(recognized_text)
     print("\nFull text: ", full_text)
     return full_text
-
-    # # Start transcribing the audio file
-    # result = speech_recognizer.recognize_once_async()
-    # final_result = result.get()
-    # print("about to get the text")
-    # print(final_result.text)
-    # # Return the transcribed text
-    # return final_result.text
 
 
 def generate_pdf(transcript, output_path):
