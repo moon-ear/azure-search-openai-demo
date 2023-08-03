@@ -42,24 +42,28 @@ const Upload = () => {
 
     const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
         if (e.target.files) {
-            const files = Array.from(e.target.files).map(file => {
+            const newFiles = Array.from(e.target.files).map(file => {
                 return { file, error: !isSupportedFile(file.type) };
             });
-            setSelectedFiles(files);
+            setSelectedFiles(prevFiles => [...prevFiles, ...newFiles]);
         }
     };
 
     const handleDrop = (e: React.DragEvent<HTMLLabelElement>) => {
         e.preventDefault();
         if (e.dataTransfer.items) {
-            const files = Array.from(e.dataTransfer.items)
+            const newFiles = Array.from(e.dataTransfer.items)
                 .filter(item => item.kind === "file")
                 .map(item => {
                     const file = item.getAsFile() as File;
                     return { file, error: !isSupportedFile(file.type) };
                 });
-            setSelectedFiles(files);
+            setSelectedFiles(prevFiles => [...prevFiles, ...newFiles]);
         }
+    };
+
+    const resetSelectedFiles = () => {
+        setSelectedFiles([]);
     };
 
     const handleDragOver = (e: React.DragEvent<HTMLLabelElement>) => {
@@ -158,7 +162,7 @@ const Upload = () => {
     return (
         <>
             <div className="w-1/2 mx-auto pt-8">
-                <h1 className="text-3xl text-center">Upload Multiple Files</h1>
+                <h1 className="text-center text-3xl mb-3 font-semibold">Upload Multiple Files</h1>
 
                 <div className="flex pt-5 items-center justify-center w-full">
                     <label
@@ -199,7 +203,33 @@ const Upload = () => {
                     </label>
                 </div>
 
+                {/* Uploaded Cards */}
                 <div className="mt-4 w-full">
+                    {/* Clear All Button */}
+                    {selectedFiles.length > 0 ? (
+                        <div className="text-right">
+                            <button
+                                onClick={resetSelectedFiles}
+                                type="button"
+                                className="inline-flex items-center px-2 py-1 mr-2 text-xs font-medium text-red-800 bg-red-100 rounded hover:bg-red-200 hover:text-red-900"
+                            >
+                                Clear All
+                                <div className="inline-flex items-center p-1 ml-1 text-sm text-red-400 bg-transparent rounded-sm">
+                                    <svg className="w-2 h-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
+                                        <path
+                                            stroke="currentColor"
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                            strokeWidth="2"
+                                            d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"
+                                        />
+                                    </svg>
+                                </div>
+                            </button>
+                        </div>
+                    ) : null}
+
+                    <div className="text-sm mb-1 mr-1 text-right font-semibold text-gray-700"></div>
                     {selectedFiles.map((file, index) => (
                         <div
                             key={index}
@@ -223,7 +253,7 @@ const Upload = () => {
                                     </svg>
                                 </div>
                                 {/* Icon placeholder */}
-                                <span className="text-sm text-gray-500 dark:text-gray-400">{file.file.name}</span>
+                                <span className="text-sm text-gray-500 break-words">{file.file.name}</span>
                                 <h2 className="ml-2 font-semibold text-xs text-gray-500/80 dark:text-gray-400">{formatFileSize(file.file.size)}</h2>
                                 {file.error && (
                                     <span className="ml-2 bg-red-100 text-red-800 text-xs font-medium mr-2 px-2.5 py-0.5 rounded dark:bg-red-900 dark:text-red-300">
