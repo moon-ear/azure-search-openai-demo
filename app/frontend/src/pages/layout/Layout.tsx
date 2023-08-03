@@ -6,7 +6,7 @@ const Layout = () => {
     const location = useLocation();
 
     return (
-        <div className={styles.container}>
+        <div className="flex h-screen">
             <div className="w-64 px-3 py-4 overflow-y-auto bg-gray-50">
                 <ul className="space-y-2 font-medium">
                     <li>
@@ -131,8 +131,7 @@ const Layout = () => {
                     </li> */}
                 </ul>
             </div>
-
-            <div className={styles.outlet}>
+            <div className="overflow-auto flex-1 p-10 bg-white">
                 <Outlet />
             </div>
         </div>

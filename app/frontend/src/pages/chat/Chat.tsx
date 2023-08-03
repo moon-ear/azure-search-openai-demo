@@ -34,6 +34,8 @@ const Chat = () => {
     const [selectedAnswer, setSelectedAnswer] = useState<number>(0);
     const [answers, setAnswers] = useState<[user: string, response: AskResponse][]>([]);
 
+    const [chatTimeout, setChatTimeout] = useState<boolean>(false);
+
     const makeApiRequest = async (question: string) => {
         lastQuestionRef.current = question;
 
@@ -41,6 +43,12 @@ const Chat = () => {
         setIsLoading(true);
         setActiveCitation(undefined);
         setActiveAnalysisPanelTab(undefined);
+        setChatTimeout(false);
+
+        // Start a timer that will set userWaitedTooLong to true after 10 seconds
+        const timer = setTimeout(() => {
+            setChatTimeout(true);
+        }, 20000);
 
         try {
             const history: ChatTurn[] = answers.map(a => ({ user: a[0], bot: a[1].answer }));
@@ -62,6 +70,9 @@ const Chat = () => {
             setError(e);
         } finally {
             setIsLoading(false);
+
+            // Clear the timer if the request is completed within 10 seconds
+            clearTimeout(timer);
         }
     };
 
@@ -166,11 +177,15 @@ const Chat = () => {
                                     </div>
                                 </>
                             )}
-                            {error ? (
+                            {error || chatTimeout ? (
                                 <>
                                     <UserChatMessage message={lastQuestionRef.current} />
                                     <div className={styles.chatMessageGptMinWidth}>
-                                        <AnswerError error={error.toString()} onRetry={() => makeApiRequest(lastQuestionRef.current)} />
+                                        {error ? (
+                                            <AnswerError error={error.toString()} onRetry={() => makeApiRequest(lastQuestionRef.current)} />
+                                        ) : (
+                                            <AnswerError error="Timeout Reached. Please Retry" onRetry={() => makeApiRequest(lastQuestionRef.current)} />
+                                        )}
                                     </div>
                                 </>
                             ) : null}
