@@ -10,6 +10,7 @@ export async function askApi(options: AskRequest): Promise<AskResponse> {
             question: options.question,
             approach: options.approach,
             overrides: {
+                retrieval_mode: options.overrides?.retrievalMode,
                 semantic_ranker: options.overrides?.semanticRanker,
                 semantic_captions: options.overrides?.semanticCaptions,
                 top: options.overrides?.top,
@@ -40,6 +41,7 @@ export async function chatApi(options: ChatRequest): Promise<AskResponse> {
             history: options.history,
             approach: options.approach,
             overrides: {
+                retrieval_mode: options.overrides?.retrievalMode,
                 semantic_ranker: options.overrides?.semanticRanker,
                 semantic_captions: options.overrides?.semanticCaptions,
                 top: options.overrides?.top,
@@ -61,41 +63,54 @@ export async function chatApi(options: ChatRequest): Promise<AskResponse> {
     return parsedResponse;
 }
 
+export function getCitationFilePath(citation: string): string {
+    return `/content/${citation}`;
+}
+
+// My functions
 export async function getDocumentNames() {
+    console.log("getDocuments");
     const response = await fetch("/get_documents", {
         method: "POST",
         headers: {
             "Content-Type": "application/json"
         }
     });
+    console.log("response");
+    console.log(response);
+
     if (response.status > 299 || !response.ok) {
         const errorResponse = await response.json();
+        console.log("errorResponse");
+        console.log(errorResponse);
         throw Error(errorResponse.error || "Unknown error");
     }
-
     const parsedResponse: BlobDocument[] = await response.json();
+
+    console.log("parsedResponse");
+    console.log(parsedResponse);
     return parsedResponse;
 }
 
-export async function getSearch() {
-    try {
-        const response = await fetch("/get_search", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            }
-        });
+// export async function getSearch() {
+//     try {
+//         const response = await fetch("/get_search", {
+//             method: "POST",
+//             headers: {
+//                 "Content-Type": "application/json"
+//             }
+//         });
 
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
+//         if (!response.ok) {
+//             throw new Error(`HTTP error! status: ${response.status}`);
+//         }
 
-        const data = await response.json();
-        return data;
-    } catch (error) {
-        console.error("Error:", error);
-    }
-}
+//         const data = await response.json();
+//         return data;
+//     } catch (error) {
+//         console.error("Error:", error);
+//     }
+// }
 
 export async function deleteDocument(blobName: string) {
     const response = await fetch("/delete_document", {
@@ -159,8 +174,4 @@ export async function getStatus(fileName: string): Promise<string> {
 
     const data = await response.json();
     return data.status;
-}
-
-export function getCitationFilePath(citation: string): string {
-    return `/content/${citation}`;
 }

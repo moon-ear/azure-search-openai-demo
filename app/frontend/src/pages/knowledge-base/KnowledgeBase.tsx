@@ -1,5 +1,5 @@
 import { ChangeEvent, useEffect, useRef, useState } from "react";
-import { BlobDocument, deleteAllDocuments, deleteDocument, getDocumentNames, getSearch } from "../../api";
+import { deleteDocument, getDocumentNames } from "../../api";
 import Pagination from "../../components/Pagination/Pagination";
 
 enum ActionOption {
@@ -16,7 +16,7 @@ export interface TableData {
     // size: string;
 }
 
-const KnowledgeBase = () => {
+export function Component(): JSX.Element {
     const [isActionDropdownOpen, setActionDropdownOpen] = useState(false);
     const [selectedAction, setSelectedAction] = useState("");
     const [selectedAll, setSelectedAll] = useState(false);
@@ -64,17 +64,17 @@ const KnowledgeBase = () => {
         }
     };
 
-    const search = async () => {
-        try {
-            const result = await getSearch();
-            console.log("printing out search result");
-            console.log("search result", result);
-        } catch (e) {
-            setError(e);
-        } finally {
-            setIsLoading(false);
-        }
-    };
+    // const search = async () => {
+    //     try {
+    //         const result = await getSearch();
+    //         console.log("printing out search result");
+    //         console.log("search result", result);
+    //     } catch (e) {
+    //         setError(e);
+    //     } finally {
+    //         setIsLoading(false);
+    //     }
+    // };
 
     const deleteDocuments = async (documentNames: string[]) => {
         deleteError && setDeleteError(undefined);
@@ -169,7 +169,7 @@ const KnowledgeBase = () => {
 
     useEffect(() => {
         getTableData();
-        search();
+        // search();
         // deleteAllDocuments();
         document.addEventListener("mousedown", handleOutsideClick);
         return () => {
@@ -205,8 +205,8 @@ const KnowledgeBase = () => {
 
     if (isLoading || deleteLoading) {
         return (
-            <div className="text-center pt-32">
-                <div role="status">
+            <div className="flex w-full bg-white text-center pt-32">
+                <div className="mx-auto" role="status">
                     <svg
                         aria-hidden="true"
                         className="inline w-8 h-8 mr-2 text-gray-200 animate-spin dark:text-gray-600 fill-blue-600"
@@ -230,8 +230,8 @@ const KnowledgeBase = () => {
     }
 
     return (
-        <div>
-            <div className="relative overflow-x-auto sm:rounded-lg">
+        <div className="flex flex-1 flex-col items-center bg-white px-5">
+            <div className="w-full pt-5 relative overflow-x-auto sm:rounded-lg">
                 <div className="flex items-center justify-between pb-4 bg-white">
                     {/* Dropdown Button */}
                     <div className="pb-5 pt-5 pl-2">
@@ -378,6 +378,6 @@ const KnowledgeBase = () => {
             <Pagination filteredData={filteredData} itemsPerPage={itemsPerPage} setCurrentPage={setCurrentPage} currentPage={currentPage} />
         </div>
     );
-};
+}
 
-export default KnowledgeBase;
+Component.display = "KnowledgeBase";

@@ -1,5 +1,5 @@
 import { Dispatch, SetStateAction } from "react";
-import { TableData } from "../../pages/knowledgeBase/KnowledgeBase";
+import { TableData } from "../../pages/knowledge-base/KnowledgeBase";
 
 interface PaginationProps {
     filteredData: TableData[];
@@ -30,7 +30,7 @@ const Pagination: React.FC<PaginationProps> = ({ filteredData, itemsPerPage, cur
     };
 
     return (
-        <nav className="flex items-center justify-between pt-4" aria-label="Table navigation">
+        <nav className="w-full flex items-center justify-between pt-4" aria-label="Table navigation">
             <span className="text-sm font-normal text-gray-500">
                 {"Showing "}
                 <span className="font-semibold text-gray-900">

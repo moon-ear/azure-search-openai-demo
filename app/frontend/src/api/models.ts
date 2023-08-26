@@ -4,7 +4,14 @@ export const enum Approaches {
     ReadDecomposeAsk = "rda"
 }
 
+export const enum RetrievalMode {
+    Hybrid = "hybrid",
+    Vectors = "vectors",
+    Text = "text"
+}
+
 export type AskRequestOverrides = {
+    retrievalMode?: RetrievalMode;
     semanticRanker?: boolean;
     semanticCaptions?: boolean;
     excludeCategory?: string;
@@ -29,8 +36,6 @@ export type AskResponse = {
     error?: string;
 };
 
-export type BlobDocument = [name: string, info: [date: string, etag: string]];
-
 export type ChatTurn = {
     user: string;
     bot?: string;
@@ -41,3 +46,7 @@ export type ChatRequest = {
     approach: Approaches;
     overrides?: AskRequestOverrides;
 };
+
+// My models
+
+export type BlobDocument = [name: string, info: [date: string, etag: string]];

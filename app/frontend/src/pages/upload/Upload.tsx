@@ -9,7 +9,7 @@ type SelectedFile = {
     error: boolean;
 };
 
-const Upload = () => {
+export function Component(): JSX.Element {
     const $modalElement: HTMLElement | null = document.querySelector("#defaultModal");
 
     const modalOptions: ModalOptions = {
@@ -161,10 +161,11 @@ const Upload = () => {
 
     return (
         <>
-            <div className="w-1/2 mx-auto pt-8">
+            <div className="w-full px-10 bg-white mx-auto pt-8">
                 <h1 className="text-center text-3xl mb-3 font-semibold">Upload Multiple Files</h1>
 
-                <div className="flex pt-5 items-center justify-center w-full">
+                {/* Dropzone */}
+                <div className="flex pt-5 mx-auto items-center justify-center w-2/3">
                     <label
                         htmlFor="dropzone-file"
                         onDrop={handleDrop}
@@ -204,7 +205,7 @@ const Upload = () => {
                 </div>
 
                 {/* Uploaded Cards */}
-                <div className="mt-4 w-full">
+                <div className="mt-4 px-10 mx-auto w-2/3">
                     {/* Clear All Button */}
                     {selectedFiles.length > 0 ? (
                         <div className="text-right">
@@ -282,24 +283,24 @@ const Upload = () => {
                         </div>
                     ))}
                 </div>
-            </div>
 
-            {/* Upload Button */}
-            <div className="pt-5 text-center">
-                <button
-                    onClick={handleFileUpload}
-                    data-modal-target="defaultModal"
-                    data-modal-toggle="defaultModal"
-                    type="button"
-                    disabled={supportedFilesCount < 1}
-                    className={`text-white font-medium rounded-lg text-sm px-5 py-2.5 mr-2 mb-2 ${
-                        supportedFilesCount < 1
-                            ? "bg-gray-400 cursor-not-allowed hover:bg-gray-400 focus:ring-0"
-                            : "bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300"
-                    }`}
-                >
-                    Upload
-                </button>
+                {/* Upload Button */}
+                <div className="pt-5 text-center">
+                    <button
+                        onClick={handleFileUpload}
+                        data-modal-target="defaultModal"
+                        data-modal-toggle="defaultModal"
+                        type="button"
+                        disabled={supportedFilesCount < 1}
+                        className={`text-white font-medium rounded-lg text-sm px-5 py-2.5 mr-2 mb-2 ${
+                            supportedFilesCount < 1
+                                ? "bg-gray-400 cursor-not-allowed hover:bg-gray-400 focus:ring-0"
+                                : "bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300"
+                        }`}
+                    >
+                        Upload
+                    </button>
+                </div>
             </div>
 
             {/* Upload Modal */}
@@ -348,7 +349,7 @@ const Upload = () => {
                                         {selectedFiles
                                             .filter(file => isSupportedFile(file.file.type))
                                             .map((file, index) => (
-                                                <tr key={index} className="bg-white border-b dark:bg-gray-800">
+                                                <tr key={index} className={`bg-white ${index < selectedFiles.length - 1 ? "border-b" : ""} dark:bg-gray-800`}>
                                                     <th scope="row" className="px-6 py-4 font-medium text-gray-900 whitespace-normal ">
                                                         {file.file.name}
                                                     </th>
@@ -393,6 +394,6 @@ const Upload = () => {
             </div>
         </>
     );
-};
+}
 
-export default Upload;
+Component.display = "Upload";
